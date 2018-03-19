@@ -6,6 +6,17 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
+var fs = require('fs');
+var mongoose = require('mongoose');
+
+mongoose.connect("mongodb://localhost:27017/souq");
+
+fs.readdirSync(path.join(__dirname,"models")).forEach(function (fileName) {
+    
+    require("./models/" + fileName);
+    
+});
+
 
 var app = express();
 
