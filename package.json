@@ -1,0 +1,31 @@
+{
+  "name": "purchase",
+  "version": "1.0.0",
+  "description": "An online shopping app designed for both customers and sellers to facilitate the trading process between them",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MinaNasr/purchase.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MinaNasr/purchase/issues"
+  },
+  "homepage": "https://github.com/MinaNasr/purchase#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.3",
+    "express-generator": "^4.15.5",
+    "morgan": "^1.9.0",
+    "path": "^0.12.7",
+    "serve-favicon": "^2.4.5",
+    "session": "^0.1.0"
+  }
+}
