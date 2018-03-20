@@ -8,6 +8,18 @@ var fs = require("fs");
 var mongoose = require("mongoose")
 
 ///database connect
+var index = require('./routes/index');
+var fs = require('fs');
+var mongoose = require('mongoose');
+
+mongoose.connect("mongodb://localhost:27017/souq");
+
+fs.readdirSync(path.join(__dirname,"models")).forEach(function (fileName) {
+    
+    require("./models/" + fileName);
+    
+});
+
 
 mongoose.connect("mongodb://localhost:27017/test");
 
