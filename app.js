@@ -2,10 +2,20 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+var fs = require("fs");
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
 
-var index = require('./routes/index');
+
+//mongodb://admin:123456@localhost:27017/node_day3 --> AuthMod
+mongoose.connect("mongodb://localhost:27017/purchase");
+
+fs.readdirSync(path.join(__dirname,"models")).forEach(function(filename){
+  require('./models/'+filename);
+});
+
+var orders = require('./controuler/orders');
 
 var app = express();
 
@@ -18,7 +28,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
+app.use('/api/orders', orders);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -35,7 +45,8 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
-});
+  res.json(err);
 
+});
+app.listen(9050);
 module.exports = app;
