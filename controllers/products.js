@@ -7,6 +7,9 @@ var fileUploadMid = multer({dest:"./public/images"})
 var bodyParser = require("body-parser");
 var UrlEncodedParser = bodyParser.urlencoded({extended:true});
 var jsonParser = bodyParser.json();
+var mongodb = require('mongodb');
+
+
 
 
 router.use(function(request,response,next){
@@ -23,68 +26,70 @@ var productsModule = mongoose.model("products");
 router.get('/:id?', function(request, response, next) {
     if(request.params.id){
         var id = request.params.id
-        response.send("products: "+id);
         productsModule.findOne({_id:id},function(err,result){
             response.json(result);
         })
     }else{
-        response.send("products");
         productsModule.find({},function(err,result){
-            response.json(results);
+            response.json(result);
         })
     }
   
 });
 
-router.get('/add',function(request,response,next){
-    response.send("products");
-});
-
-router.post('/add',fileUploadMid.single("image"),function(request,response,next){
+// add with post request
+router.post('/add',UrlEncodedParser,function(request,response,next){
     console.log(request.body.productName)
     var product = new productsModule({
-        productName:request.body.productName,
-        productPrice:request.body.productPrice
-
+        name :request.body.productName,
+        price:request.body.productPrice,
+        desc:request.body.productDesc,
+        userId:request.body.userId,
+        img:request.body.image
     })
-
     product.save(function(err,result){
         if(!err){
+            // response.send(request.body)
             response.send('product added');
         }else{
             response.json(err);
             
         }
     })
-
-});
-
-router.get('/edit/:id',function(request,response,next){
     
+
 });
 
+//edit with post request
 router.post('/edit/:id',fileUploadMid.single("image"),function(request,response,next){
     var id = request.params.id
     response.send(request.body)
     console.log(request.body.productName)
     console.log(request.params.id)
-    // productsModule.update({_id:id},{"$set":{productName:request.body.productName,productPrice:request.body.productPrice,productDesc:request.body.productDesc}},function(err,result){
-    //     if(!err){
-    //         resonse.send("product edited")
-    //     }else{
-    //         resonse.send("failed to edit")
-    //     }
-    // })
+    productsModule.update({_id:id},{"$set":{name:request.body.productName,price:request.body.productPrice,desc:request.body.productDesc,userId:request.body.userId,img:request.body.image}},function(err,result){
+         if(!err){
+             response.send("product edited")
+         }else{
+             console.log(err)
+             response.send("failed to edit")
+         }
+     })
 });
+
+//delete with get request
 
 router.get('/delete/:id?',function(request,response,next){
     if(request.params.id){
-        if(isNaN(request.param.id)){
-            response.send("error")
+            productsModule.remove({_id:request.params.id},function(err,data){
+                    if(!err){
+                        response.send("deleted")
+                    }else{
+                        response.status(404).send('Not found');
+                    } 
+             })    
         }else{
-            productsModule.remove({_id:request.params.id})
+            response.status(404).send('Not found');
         }
-    }
-});
+    });
 
 module.exports = router;
