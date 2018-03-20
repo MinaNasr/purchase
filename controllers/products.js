@@ -41,10 +41,11 @@ router.get('/add',function(request,response,next){
 });
 
 router.post('/add',fileUploadMid.single("image"),function(request,response,next){
-    console.log(request.body)
+    console.log(request.body.productName)
     var product = new productsModule({
         productName:request.body.productName,
         productPrice:request.body.productPrice
+
     })
 
     product.save(function(err,result){
@@ -55,8 +56,6 @@ router.post('/add',fileUploadMid.single("image"),function(request,response,next)
             
         }
     })
-    response.json(response.body)
-    console.log(response.body.productName)
 
 });
 
@@ -65,19 +64,27 @@ router.get('/edit/:id',function(request,response,next){
 });
 
 router.post('/edit/:id',fileUploadMid.single("image"),function(request,response,next){
-    response.send("products");
     var id = request.params.id
-    productsModule.update({_id:id}{"$set":{productName:request.body.productName,productPrice:request.body.productPrice,productDesc:request.body.productDesc}},function(err,result){
-        if(!err){
-            resonse.send("product edited")
-        }else{
-            resonse.send("failed to edit")
-        }
-    })
+    response.send(request.body)
+    console.log(request.body.productName)
+    console.log(request.params.id)
+    // productsModule.update({_id:id},{"$set":{productName:request.body.productName,productPrice:request.body.productPrice,productDesc:request.body.productDesc}},function(err,result){
+    //     if(!err){
+    //         resonse.send("product edited")
+    //     }else{
+    //         resonse.send("failed to edit")
+    //     }
+    // })
 });
 
-router.get('/delete/:id',function(request,response,next){
-    response.send("products");
+router.get('/delete/:id?',function(request,response,next){
+    if(request.params.id){
+        if(isNaN(request.param.id)){
+            response.send("error")
+        }else{
+            productsModule.remove({_id:request.params.id})
+        }
+    }
 });
 
 module.exports = router;
