@@ -16,6 +16,8 @@ fs.readdirSync(path.join(__dirname, "models")).forEach(function (filename) {
 });
 
 var orders = require('./controuler/orders');
+var products = require('./controuler/products');
+
 
 var app = express();
 
@@ -29,6 +31,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/orders', orders);
+app.use('/api/products', products);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
