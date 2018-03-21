@@ -22,6 +22,13 @@ var categories = require('./controuler/category');
 
 var app = express();
 
+app.use(function(req,resp,next){
+  resp.header("Access-Control-Allow-Origin","*");
+  resp.header("Access-Control-Allow-Headers","Content-Type");
+  resp.header("Access-Control-Allow-Methods","GET,POST,PUT,DELETE");
+  next();
+});
+
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

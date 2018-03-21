@@ -1,0 +1,4 @@
+[
+    {"name" : "mobiles", "_id" : 1, "subcat" : [1, 2]},
+    {"name" : "tv", "_id" : 2, "subcat" : []}
+]

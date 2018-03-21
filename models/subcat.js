@@ -2,11 +2,12 @@ var mongoose = require('mongoose');
 
 var Schema = mongoose.Schema;
 
-var subCatSchema = new Schema({ 
+var subCatSchema = new Schema({
+   _id : Number,  
    name:{
        type: String,
    },
-   subCat: [{
+   products: [{
        type: Schema.Types.ObjectId,
        ref:'products'
    }]

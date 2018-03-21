@@ -17,11 +17,13 @@ router.get("/:catname?",function(req, resp){
 
     });
   }else {
+    console.log("in");    
     catModel.find({},function(err,result){
       if (err) {
         resp.json(err);
       }else {
-        resp.json({"result":{"category":result}});
+        //resp.json({"result":{"category":result}});
+        resp.json(result);
       }
     });
   }
