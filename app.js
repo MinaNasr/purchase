@@ -13,7 +13,7 @@ var mongoose = require("mongoose")
 var fs = require('fs');
 var mongoose = require('mongoose');
 
-mongoose.connect("mongodb://localhost:27017/souq");
+mongoose.connect("mongodb://localhost:27017/purchase");
 
 fs.readdirSync(path.join(__dirname,"models")).forEach(function (fileName) {
     
@@ -40,7 +40,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/products', products);
+app.use('/api/products', products);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -57,9 +57,9 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json({error:'error'});
 });
 
-app.listen(10000);
+app.listen(9050);
 
 module.exports = app;
