@@ -6,7 +6,7 @@ var jsonParser = bodyParser.json();
 var mongoose = require('mongoose');
 var catModel = mongoose.model('category');
 
-router.get("/list/:catname?",function(req, resp){
+router.get("/:catname?",function(req, resp){
   if(req.params.catname){
     catModel.find({name : req.params.catname},function(err,result){
       if (err) {
@@ -14,8 +14,7 @@ router.get("/list/:catname?",function(req, resp){
       }else {
         resp.json({"result":{"category":result}});
       }
-      // resp.send("category/list");
-      // resp.render("category/list",{cats:result});
+
     });
   }else {
     catModel.find({},function(err,result){
@@ -24,7 +23,6 @@ router.get("/list/:catname?",function(req, resp){
       }else {
         resp.json({"result":{"category":result}});
       }
-      // resp.render("category/list",{cats:result});
     });
   }
 });
