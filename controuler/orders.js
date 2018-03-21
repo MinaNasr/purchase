@@ -36,7 +36,7 @@ router.get('/:id?', function (req, res, next) {
 
 });
 
-router.post('/add',urlencodeMid, function (req, res, next) {
+router.post('/add',jsonParser, function (req, res, next) {
   console.log(req.body);
   console.log(req.body.status);
   console.log(req.body.products);
@@ -57,7 +57,7 @@ router.post('/add',urlencodeMid, function (req, res, next) {
   });
 });
 
-router.put('/edit/:id', function (req, res, next) {
+router.put('/edit/:id',jsonParser, function (req, res, next) {
   ordersModel.update({ orderId: req.params.id },
     {
       "$set": {
