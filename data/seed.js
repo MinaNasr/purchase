@@ -2,7 +2,7 @@ const cat = require('./category');
 const subcat = require('./subcat');
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/souq');
+mongoose.connect('mongodb://localhost:27017/purchase');
 
 require('../models/category');
 require('../models/subcat');
