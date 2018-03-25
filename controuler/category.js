@@ -17,13 +17,15 @@ router.get("/:catname?",function(req, resp){
 
     });
   }else {
-    catModel.find({},function(err,result){
-      if (err) {
-        resp.json(err);
-      }else {
-        resp.json({"result":{"category":result}});
+    console.log("in");    
+    catModel.find({}).populate('subcat').exec((err, data) => {
+      if(!err){
+        console.log(data);
+        
+        resp.json(data);
       }
     });
+    
   }
 });
 

@@ -1,0 +1,14 @@
+[
+    {"name" : "Mobiles", "_id" : 1, "products" : []},
+    {"name" : "Tablets", "_id" : 2, "products" : []},
+    {"name" : "Mobile Accessories", "_id" : 3, "products" : []},
+    {"name" : "Power Bank", "_id" : 4, "products" : []},
+    {"name" : "Televisions", "_id" : 5, "products" : []},
+    {"name" : "Projectors", "_id" : 6, "products" : []},
+    {"name" : "Basketball", "_id" : 7, "products" : []},
+    {"name" : "Football", "_id" : 8, "products" : []},
+    {"name" : "Camping", "_id" : 9, "products" : []},
+    {"name" : "Women Tops", "_id" : 10, "products" : []},
+    {"name" : "men Tops", "_id" : 11, "products" : []},
+    {"name" : "Bags", "_id" : 12, "products" : []}    
+]
