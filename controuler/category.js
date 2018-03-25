@@ -20,6 +20,8 @@ router.get("/:catname?",function(req, resp){
     console.log("in");    
     catModel.find({}).populate('subcat').exec((err, data) => {
       if(!err){
+        console.log(data);
+        
         resp.json(data);
       }
     });
