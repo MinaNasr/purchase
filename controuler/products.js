@@ -46,6 +46,19 @@ router.get('/:id?', function (request, response, next) {
 
 });
 
+
+
+//seller id
+router.get('/:sellerid', function (request, response, next) {
+    if (request.params.sellerid) {
+        var seller = request.params.sellerid
+        productsModule.findOne({ userId : seller }, function (err, result) {
+            response.json(result);
+        })
+    }
+    
+});
+
 // add with post request
 router.post('/add', jsonParser, function (request, response, next) {
     console.log(request.body.productName);
