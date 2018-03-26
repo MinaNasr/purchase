@@ -6,26 +6,38 @@ var fs = require("fs");
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+var https = require("https");
+var jwt = require("jsonwebtoken");
+var jwtDecode = require('jwt-decode');
+var urlEncodedMid = bodyParser.urlencoded({extended:true,limit:"50mb"});
+var app = express();
 
+var options = {
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.crt')
+};
 
-//mongodb://admin:123456@localhost:27017/node_day3 --> AuthMod
+process.env.sercret = "mykey";
+
 mongoose.connect("mongodb://localhost:27017/purchase");
 
 fs.readdirSync(path.join(__dirname, "models")).forEach(function (filename) {
   require('./models/' + filename);
 });
 
+var apiAuth = require("./controuler/auth");
+var apiUser = require("./controuler/user");
 var orders = require('./controuler/orders');
 var products = require('./controuler/products');
 var categories = require('./controuler/category');
 
 
-var app = express();
+
 
 app.use(function(req,resp,next){
   resp.header("Access-Control-Allow-Origin","*");
-  resp.header("Access-Control-Allow-Headers","Content-Type");
-  resp.header("Access-Control-Allow-Methods","GET,POST,PUT,DELETE");
+  resp.header("Access-Control-Allow-Headers","X-ACCESS_TOKEN , Access-Control-Allow-Origin , Authorization , Origin , x-requested-with , Content-Type , token,email");
+  resp.header("Access-Control-Allow-Methods","GET,POST,PUT,DELETE")
   next();
 });
 
@@ -34,9 +46,31 @@ app.use(function(req,resp,next){
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(urlEncodedMid);
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use("/api/user",apiUser);
+app.use("/api/authenticate",apiAuth);
+
+app.use(function (req,resp,next) {
+  var userToken = req.headers['token'];
+  if (typeof userToken !== "undefined") {
+    jwt.verify(userToken, 'mykey' , function (err,authData) {
+      if (err) {
+        resp.json({resp:"not Authurized"});
+      }
+      else {
+        var decoded = jwtDecode(userToken);
+        req.userEmail = decoded.email;
+        next();
+      }
+    })
+  }
+  else {
+    resp.json({token:"not Authurized"});
+  }
+})
 
 app.use('/api/orders', orders);
 app.use('/api/products', products);
@@ -62,5 +96,5 @@ app.use(function (err, req, res, next) {
   res.json(err);
 
 });
-app.listen(9050);
-module.exports = app;
+
+https.createServer(options, app).listen(9050);
