@@ -70,6 +70,38 @@ router.get('/:seller/:id?', function (req, res, next) {
       res.json({res:arr});
       });
   }
+});
+res.json({res:arr});
+});
+    // ordersModel.find({}, function (err, result) {
+    //   var orders=[];
+    //   if (err) {
+    //     res.json(err);
+    //   } else {
+    //     result.forEach(element => {
+    //       var prod=element.products;
+    //       var arr = [];
+    //       for (let i = 0; i < prod.length; i++) {
+    //         const p = prod[i];
+    //         productsModel.findOne({_id:p},function (err,result1) {
+    //           if (result1.userId == req.params.id) {
+    //           arr.push(result1);
+    //           }
+    //         });
+
+    //       }
+    //       if(arr.length > 0){
+    //         console.log("if");
+
+    //         element.products = arr;
+    //         orders.push(element);
+    //       }
+
+    //     });
+    //     res.json({"result":{"orders":orders}});
+    //   }
+    // });
+
 
 });
 
