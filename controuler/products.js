@@ -96,7 +96,7 @@ router.put('/edit/:id', jsonParser, function (request, response, next) {
     console.log(request.params.id);
      if (request.body.name != "" && request.body.price !="" && request.body.desc !="" && 
         request.body.image != "") {
-    productsModule.update({ productId: id }, { "$set": { name: request.body.productName, price: request.body.productPrice, desc: request.body.productDesc, userId: request.body.userId, img: request.body.image } }, function (err, result) {
+    productsModule.update({ _id: id }, { "$set": { name: request.body.productName, price: request.body.productPrice, desc: request.body.productDesc, userId: request.body.userId, img: request.body.image } }, function (err, result) {
         if (!err) {
             response.json({ result: "product edited" });
         } else {
