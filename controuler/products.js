@@ -62,6 +62,8 @@ router.get('/:sellerid', function (request, response, next) {
 // add with post request
 router.post('/add', jsonParser, function (request, response, next) {
     console.log(request.body.productName);
+    if(request.body.productName != "" && request.body.productPrice !="" && request.body.productDesc !="" && 
+        request.body.image != ""){
     var product = new productsModule({
         productId: request.body.productId,
         name: request.body.productName,
@@ -80,8 +82,11 @@ router.post('/add', jsonParser, function (request, response, next) {
         }
     })
 
+         }else{
+        response.json({result:"fill all input in this form"});
+    }
 
-});
+});     
 
 //edit with post request
 router.put('/edit/:id', jsonParser, function (request, response, next) {
@@ -89,14 +94,19 @@ router.put('/edit/:id', jsonParser, function (request, response, next) {
     //response.send(request.body)
     console.log(request.body.productName);
     console.log(request.params.id);
+     if (request.body.name != "" && request.body.price !="" && request.body.desc !="" && 
+        request.body.image != "") {
     productsModule.update({ productId: id }, { "$set": { name: request.body.productName, price: request.body.productPrice, desc: request.body.productDesc, userId: request.body.userId, img: request.body.image } }, function (err, result) {
         if (!err) {
             response.json({ result: "product edited" });
         } else {
             console.log(err)
-            response.json({ result: "failed to edit" });
+            response.json(err);
         }
     })
+       }else{
+         response.json({result:"fill all input in this form"});
+    }   
 });
 
 //delete with get request
