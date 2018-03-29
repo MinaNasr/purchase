@@ -71,7 +71,7 @@ router.get('/userOrders/:uId/:page?/:oId?', function (req, res, next) {
 router.get('/:seller/:page?/:id?', function (req, res, next) {
   var page = req.params.page ? page = req.params.page : page = 1;
   var limit = 5;
-  var query = {sellerId : req.params.seller};
+  var query = { sellerId: req.params.seller };
   var options = {
     sort: { time: -1 },
     populate: 'products',
@@ -111,7 +111,7 @@ router.get('/:seller/:page?/:id?', function (req, res, next) {
 
 
   } else {
-    ordersModel.paginate(query,options).then((data) => {
+    ordersModel.paginate(query, options).then((data) => {
       console.log(data);
       data.docs.forEach(order => {
         if (order.products.length > 0) {
@@ -135,16 +135,15 @@ router.get('/:seller/:page?/:id?', function (req, res, next) {
 
 router.post('/add', jsonParser, function (req, res, next) {
 
-  var allProducts = req.body.products;
+  var allProducts = req.body;
   var ordersArr = [];
   var productsArr = [];
   var quantitiesArr = [];
+
   for (const key in allProducts) {
-    console.log(key);
+
     if (allProducts.hasOwnProperty(key)) {
-      console.log(key);
       const element = allProducts[key];
-      console.log(element);
       var order = new ordersModel({
         status: "ordered",
         products: element["products"],
@@ -153,7 +152,6 @@ router.post('/add', jsonParser, function (req, res, next) {
         quantities: element["numbers"],
         time: Date.now()
       });
-      //console.log("ordeeeeeeeeeeeeeeeeeeeeeeeeeer",order);
 
       element["products"].forEach(product => {
         productsArr.push(product);
@@ -162,64 +160,36 @@ router.post('/add', jsonParser, function (req, res, next) {
       ordersArr.push(order);
     }
   }
+  ordersModel.insertMany(ordersArr, function (err, docs) {
+    if (!err) {
+      docs.forEach(doc => {
+        decremnetProducts(doc)
+      });
+      res.json({ res: "success" });
+    } else {
+      res.json({ res: "error" });
+    }
+  });
 
-  console.log("ordersArrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",ordersArr);
-  console.log("productsArrrrrrrrrrrrrrrrrrrrrrrrrrr",productsArr);
-
-
-  var errorArr = checkAvaliablity(productsArr);
-  if (errorArr.length > 0) {
-    console.log("noooooooooooooooooooooooooooooooooooooooo");
-
-    res.json({err:errorArr});
-  } else {
-    console.log("yessssssssssssssssssssssssssssssssssssssssss");
-
-    ordersModel.insertMany(ordersArr, function (err, docs) {
-      if (!err) {
-    console.log("entered---------------------------");
-        docs.forEach(doc => {
-         decremnetProducts(doc)
-        });
-        console.log(ordersArr);
-        console.log(docs);
-        res.json({res:docs});
-      } else {
-    console.log("not----------entered---------------------------");
-        res.json({err:err});
-      }
-    });
-  }
 
 });
 
-function checkAvaliablity(arr,quants) {
-  var errorArr = [];
-  for (let i = 0; i < arr.length; i++) {
-    const element = arr[i];
-    products.find({ _id: element }, function (err, data) {
-      if (err) {
-        errorArr.push(element);
-      } else {
-        if (data.amount < quants[i] || !data.amount) {
-          errorArr.push(element);
-        }
-      }
-    })
-  }
-  // arr.forEach(element => {
-  //   products.find({ _id: element }, function (err, data) {
-  //     if (err) {
-  //       errorArr.push(element);
-  //     } else {
-  //       if (data.amount < 0) {
-  //         errorArr.push(element);
-  //       }
-  //     }
-  //   })
-  // });
-  return errorArr;
-}
+// function checkAvaliablity(arr, quants) {
+//   var errorArr = [];
+//   for (let i = 0; i < arr.length; i++) {
+//     const element = arr[i];
+//     products.find({ _id: element }, function (err, data) {
+//       if (err) {
+//         errorArr.push(element);
+//       } else {
+//         if (data.stock < quants[i] || !data.amount) {
+//           errorArr.push(element);
+//         }
+//       }
+//     })
+//   }
+//   return errorArr;
+// }
 
 function decremnetProducts(doc) {
   ordersModel.findById(doc._id).populate("products")
@@ -228,14 +198,12 @@ function decremnetProducts(doc) {
       for (let i = 0; i < data.products.length; i++) {
         const product = data.products[i];
         const quant = data.quantities[i];
-        console.log(product._id);
-        productsModel.updateOne({ _id: product._id, amount: { $gt: 0 } }
-          , { $inc: { amount: -quant } }
+        productsModel.updateOne({ _id: product._id, stock: { $gt: 0 } }
+          , { $inc: { stock: -quant } }
           , (err, raw) => {
-            console.log(raw);
             if (i == (data.products.length - 1)) {
               return 1;
-            }else{
+            } else {
               return 0;
             }
           });

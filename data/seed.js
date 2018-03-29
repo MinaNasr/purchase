@@ -37,14 +37,3 @@ catModel.insertMany(cat, (err, res) => {
     }
 });
 
-productModel.remove({}, (err, res) => {});
-
-productModel.insertMany(products, (err, res) => {
-    if(!err){
-        console.log(res);   
-        console.log(err);     
-    }else{
-        console.log(err);
-        
-    }
-});

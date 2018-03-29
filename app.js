@@ -55,28 +55,30 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use("/api/user",apiUser);
 app.use("/api/authenticate",apiAuth);
 
-app.use(function (req,resp,next) {
-  var userToken = req.headers['token'];
-  if (typeof userToken !== "undefined") {
-    jwt.verify(userToken, 'mykey' , function (err,authData) {
-      if (err) {
-        resp.json({resp:"not Authurized"});
-      }
-      else {
-        var decoded = jwtDecode(userToken);
-        req.userEmail = decoded.email;
-        next();
-      }
-    })
-  }
-  else {
-    resp.json({token:"not Authurized"});
-  }
-})
+// app.use(function (req,resp,next) {
+//   var userToken = req.headers['token'];
+//   if (typeof userToken !== "undefined") {
+//     jwt.verify(userToken, 'mykey' , function (err,authData) {
+//       if (err) {
+//         resp.json({resp:"not Authurized"});
+//       }
+//       else {
+//         var decoded = jwtDecode(userToken);
+//         req.userEmail = decoded.email;
+//         next();
+//       }
+//     })
+//   }
+//   else {
+//     resp.json({token:"not Authurized"});
+//   }
+// })
 
 app.use('/api/orders', orders);
 app.use('/api/products', products);
 app.use('/api/categories', categories);
+app.use('/api/cart', cart);
+app.use('/api/subcat', subcats);
 
 
 

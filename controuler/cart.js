@@ -9,7 +9,7 @@ var userModule = mongoose.model("users");
 var productModule = mongoose.model('products');
 var orderModule = mongoose.model('orders');
 
-router.post('/cart', jsonParser, function (request, response) {
+router.post('/add', jsonParser, function (request, response) {
 
     userModule.updateOne({ _id: request.body.userId }, { $push: { cart: request.body.productId } }, (err, res) => {
         if (!err) {
@@ -35,23 +35,22 @@ router.delete('/:userId/:productId?', (request, response) => {
     if (request.params.productId) {
         userModule.updateOne({ _id: request.params.userId }, { $pull: { cart: request.params.productId } }, (err, res) => {
             if (!err) {
-                response.redirect(303, '/api/user/cart/' + request.params.userId);
+                response.redirect(303, '/api/cart/' + request.params.userId);
             }
         });
     } else {
         userModule.updateOne({ _id: request.params.userId }, { $set: { cart: [] } }, (err, res) => {
             if (!err) {
-                response.redirect(303, '/api/user/cart/' + request.params.userId);
+                response.redirect(303, '/api/cart/' + request.params.userId);
             }
         });
     }
 });
 
-router.post('/', jsonParser, function (request, response) {
+router.post('/checkout', jsonParser, function (request, response) {
     var numberOfProducts = [];
     var products = [];
     var order = request.body;
-    //var sellers = Object.keys(order);
     var count = 0;
     var error = [];
 
@@ -68,11 +67,7 @@ router.post('/', jsonParser, function (request, response) {
 
                 if (!err) {
                     if (res.stock < numberOfProducts[count]) {
-                        error.push({ name: res.name, available: res.stock });
-                        console.log(error);
-
-                        // count++;
-                        // check();
+                        error.push({ name: res.name, available: res.stock });                        
                     }
                     count++;
                     check();
@@ -88,9 +83,10 @@ router.post('/', jsonParser, function (request, response) {
 });
 
 
-// router.post("/", (request, response) => {
+// router.post("/user", (request, response) => {
 //     var user = new userModule({
-//         name: "gemy"
+//         name: "gemy",
+//         email:"gemy@gmail.com"
 //     });
 
 //     user.save((err, res) => {

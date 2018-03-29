@@ -7,7 +7,7 @@ var mongoose = require('mongoose');
 var catModel = mongoose.model('category');
 
 router.get("/:catname?",function(req, resp){
-  console.log("sdfsdf");
+  //console.log("sdfsdf");
   if(req.params.catname){
     catModel.find({name : req.params.catname},function(err,result){
       if (err) {
