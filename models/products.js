@@ -15,6 +15,8 @@ var productSchema = new Schema({
     desc: {
         type: String,
     },
+    stock:Number,
+    subcat:String,
     userId:{ //seller
         type: Schema.Types.ObjectId,
         ref: "users"

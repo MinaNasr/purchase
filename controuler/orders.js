@@ -5,65 +5,252 @@ var urlencodeMid = bodyParser.urlencoded({ extended: true });
 var jsonParser = bodyParser.json();
 var mongoose = require('mongoose');
 var ordersModel = mongoose.model('orders');
+var productsModel = mongoose.model('products');
 
-router.use(function(req,resp,next){
-  resp.header("Access-Control-Allow-Origin","*");
-  resp.header("Access-Control-Allow-Headers","Content-Type");
-  resp.header("Access-Control-Allow-Methods","GET,POST,PUT,DELETE");
+
+router.use(function (req, resp, next) {
+  resp.header("Access-Control-Allow-Origin", "*");
+  resp.header("Access-Control-Allow-Headers", "Content-Type");
+  resp.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
   next();
 });
 /* GET home page. */
-router.get('/:id?', function (req, res, next) {
 
-  if (req.params.id) {
-    ordersModel.findOne({ orderId: req.params.id }, function (err, result) {
-      if (err) {
-        res.json(err);
+router.get('/userOrders/:uId/:page?/:oId?', function (req, res, next) {
+  var page = req.params.page ? page = req.params.page : page = 1;
+  var query = { user: req.params.uId };
+  var options = {
+    sort: { time: -1 },
+    populate: 'products',
+    offset: 0,
+    page: page,
+    limit: 5
+  };
+  if (!req.params.oId) {
+    ordersModel.find({ user: req.params.uId }, (err, result) => {
+      if (!err && result != null) {
+        ordersModel.paginate(query, options).then((data) => {
+          console.log(data);
+          data.docs.forEach(order => {
+            var total = 0;
+            for (let i = 0; i < order.products.length; i++) {
+              const element = order.products[i];
+              total += element.price;
+            }
+            order.total = total;
+          });
+          res.json({ data });
+        });
       } else {
-        res.json({"result":{"orders":result}});
+        res.json({ err: err });
+      }
+    });
+  } else {
+    ordersModel.findOne({ _id: req.params.oId }, (err, result) => {
+      if (!err && result != null) {
+        ordersModel.findOne({ _id: req.params.oId }).populate("products").populate("sellerId").exec((err, data) => {
+          console.log(data);
+          var total = 0;
+          for (let i = 0; i < data.products.length; i++) {
+            const element = data.products[i];
+            total += element.price;
+          }
+          data.total = total;
+          res.json({ res: data });
+        });
+      } else {
+        res.json({ err: err });
       }
     });
 
-  } else {
-    ordersModel.find({}, function (err, result) {
-      if (err) {
-        res.json(err);
+  }
+});
+
+
+
+router.get('/:seller/:page?/:id?', function (req, res, next) {
+  var page = req.params.page ? page = req.params.page : page = 1;
+  var limit = 5;
+  var query = {sellerId : req.params.seller};
+  var options = {
+    sort: { time: -1 },
+    populate: 'products',
+    offset: 0,
+    page: page,
+    limit: 5
+  };
+
+
+  console.log(req);
+  if (req.params.id) {
+    ordersModel.findOne({ _id: req.params.id }, (err, result) => {
+      if (!err && result != null) {
+        ordersModel.findOne({ _id: req.params.id }).populate("products").populate("user").exec((err, data) => {
+
+          var elements = [];
+          var arr = [];
+          var total = 0;
+          for (let i = 0; i < data.products.length; i++) {
+            const element = data.products[i];
+            if (element.userId == req.params.seller) {
+              elements.push(element);
+              total += element.price;
+            }
+          }
+          if (elements.length > 0) {
+            data.products = elements;
+            data.total = total;
+            arr.push(data);
+          }
+          res.json({ res: arr });
+        });
       } else {
-        res.json({"result":{"orders":result}});
+        res.json(err);
       }
+    });
+
+
+  } else {
+    ordersModel.paginate(query,options).then((data) => {
+      console.log(data);
+      data.docs.forEach(order => {
+        if (order.products.length > 0) {
+          var total = 0;
+          //   var elements=[];
+          for (let i = 0; i < order.products.length; i++) {
+            const element = order.products[i];
+            total += element.price;
+          }
+
+          order.total = total;
+        }
+      });
+      res.json(data);
     });
   }
 
 });
 
-router.post('/add',jsonParser, function (req, res, next) {
-  console.log(req.body);
-  console.log(req.body.status);
-  console.log(req.body.products);
-  
-  var order = new ordersModel({
-    orderId: req.body.orderId,
-    status: req.body.status,
-    products: req.body.products,
-    user: req.body.userId
-  });
 
-  order.save(function (err, doc) {
-    if (err) {
-      res.json(err);
-    } else {
-      res.json(doc);
+
+router.post('/add', jsonParser, function (req, res, next) {
+
+  var allProducts = req.body;
+  var ordersArr = [];
+  var productsArr = [];
+  var quantitiesArr = [];
+  for (const key in allProducts) {
+    console.log(key);
+    if (allProducts.hasOwnProperty(key)) {
+      console.log(key);
+      const element = allProducts[key];
+      console.log(element);
+      var order = new ordersModel({
+        status: "ordered",
+        products: element["products"],
+        user: req.body.user,
+        sellerId: key,
+        quantities: element["numbers"],
+        time: Date.now()
+      });
+      //console.log("ordeeeeeeeeeeeeeeeeeeeeeeeeeer",order);
+      
+      element["products"].forEach(product => {
+        productsArr.push(product);
+      });
+      quantitiesArr.push(...order.quantities);
+      ordersArr.push(order);
     }
-  });
+  }
+
+  console.log("ordersArrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",ordersArr);
+  console.log("productsArrrrrrrrrrrrrrrrrrrrrrrrrrr",productsArr);
+  
+
+  // var errorArr = checkAvaliablity(productsArr);
+  // if (errorArr.length > 0) {
+  //   console.log("noooooooooooooooooooooooooooooooooooooooo");
+    
+  //   res.json({err:errorArr});
+  // } else {
+  //   console.log("yessssssssssssssssssssssssssssssssssssssssss");
+    
+    ordersModel.insertMany(ordersArr, function (err, docs) {
+      if (!err) {
+    console.log("entered---------------------------");        
+        docs.forEach(doc => {
+         decremnetProducts(doc)
+        });
+        console.log(ordersArr);
+        console.log(docs);
+        res.json({res: "success"});        
+      } else {
+    console.log("not----------entered---------------------------");                
+        res.json({err:"error"});
+      }
+    });
+  // }
+
 });
 
-router.put('/edit/:id',jsonParser, function (req, res, next) {
-  ordersModel.update({ orderId: req.params.id },
+function checkAvaliablity(arr,quants) {
+  var errorArr = [];
+  for (let i = 0; i < arr.length; i++) {
+    const element = arr[i];
+    products.find({ _id: element }, function (err, data) {
+      if (err) {
+        errorArr.push(element);
+      } else {
+        if (data.stock < quants[i] || !data.stock) {
+          errorArr.push(element);
+        }
+      }
+    })
+  }
+  // arr.forEach(element => {
+  //   products.find({ _id: element }, function (err, data) {
+  //     if (err) {
+  //       errorArr.push(element);
+  //     } else {
+  //       if (data.amount < 0) {
+  //         errorArr.push(element);
+  //       }
+  //     }
+  //   })
+  // });
+  return errorArr;
+}
+
+function decremnetProducts(doc) {
+  ordersModel.findById(doc._id).populate("products")
+    .exec((err, data) => {
+
+      for (let i = 0; i < data.products.length; i++) {
+        const product = data.products[i];
+        const quant = data.quantities[i];
+        console.log(product._id);
+        console.log(quant);
+        productsModel.updateOne({ _id: product._id, stock: { $gt: 0 } }
+          , { $inc: { stock: -quant } }
+          , (err, raw) => {
+            console.log(raw);
+            if (i == (data.products.length - 1)) {
+              return 1;
+            }else{
+              return 0;
+            }
+          });
+
+      }
+    });
+
+}
+
+router.put('/edit/:id', jsonParser, function (req, res, next) {
+  ordersModel.update({ _id: req.params.id },
     {
       "$set": {
         status: req.body.status,
-        products: req.body.products,
-        user: req.body.userId
       }
     }
     , function (err, data) {
@@ -77,7 +264,7 @@ router.put('/edit/:id',jsonParser, function (req, res, next) {
 
 
 router.delete('/delete/:id', function (req, res, next) {
-  ordersModel.remove({ orderId: req.params.id }, function (err, data) {
+  ordersModel.remove({ _id: req.params.id }, function (err, data) {
     if (err) {
       res.json(err);
     } else {

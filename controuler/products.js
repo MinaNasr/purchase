@@ -6,18 +6,12 @@ var multer = require("multer");
 var fileUploadMid = multer({ dest: "./public/images" });
 var bodyParser = require("body-parser");
 var UrlEncodedParser = bodyParser.urlencoded({ extended: true });
-var jsonParser = bodyParser.json();
+var jsonParser = bodyParser.json({limit:"50mb"});
 var mongodb = require('mongodb');
-
-// router.use(function (request, response, next) {
-//     response.header("Access-Control-Allow-Origin", "*");
-//     response.header("Acecess-Control-Allow-Headers", "Content-Type");
-//     response.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE")
-//     next();
-// })
 
 //creating products database model
 var productsModule = mongoose.model("products");
+var subcatModule = mongoose.model("subcat");
 
 /* GET home page. */
 
@@ -29,8 +23,6 @@ router.get('/search/:keyword', (req, res) => {
         res.json(data);
     });
 });
-
-
 
 router.get('/:id?', function (request, response, next) {
     if (request.params.id) {
@@ -49,21 +41,29 @@ router.get('/:id?', function (request, response, next) {
 // add with post request
 router.post('/add', jsonParser, function (request, response, next) {
     console.log(request.body.productName);
+    var subcat = request.body.subcat;
     var product = new productsModule({
         productId: request.body.productId,
         name: request.body.productName,
         price: request.body.productPrice,
         desc: request.body.productDesc,
+        stock: request.body.pcs,
+        subcat: request.body.subcat,
         userId: request.body.userId,
         img: request.body.image
     })
     product.save(function (err, result) {
-        if (!err) {
-            // response.send(request.body)
-            response.json({ result: 'product added' });
+        if (!err) {            
+            subcatModule.updateOne({name:subcat}, {$push : {products:result._id}}, (err, res) => {
+                if(!err){
+                    response.json({ result: 'product added' });
+                }else{
+                    response.json(err); 
+                }
+            });
+
         } else {
             response.json(err);
-
         }
     })
 

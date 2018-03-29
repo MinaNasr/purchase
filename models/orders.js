@@ -12,14 +12,22 @@ var orderSchema = new Schema({
         type: String
     },
     products: [{
-        type: Schema.Types.Number,
+        type: Schema.Types.ObjectId,
         ref: 'products'
     }],
     user: {
-        type: Number,
+        type: Schema.Types.ObjectId,
         ref: 'users'
-    }
+    },
+    sellerId: {
+        type: Schema.Types.ObjectId,
+        ref: 'users'
+    },
+    quantities:[{
+        type: Number
+    }],
+    total:Number,
+    time:Date
 });
 orderSchema.plugin(mongoose_paginate);
 mongoose.model("orders", orderSchema);
-
