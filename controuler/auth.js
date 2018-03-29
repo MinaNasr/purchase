@@ -16,31 +16,38 @@ var User = mongoose.model("users");
 router.get("/",function(req , resp) {
 
   let userToken = req.headers.token;
-  console.log(req.headers.token);
   jwt.verify(userToken, 'mykey' , function (err,authData) {
     if (err) {
       resp.status(404).json({redirect :"redirect to login"});
     }
     else {
       let currentProvider = authData.provider;
-      switch (currentProvider) {
-        case "google":
-        resp.status(200).json({logIn :"Login Now", loggedInWith :"google"});
-        break;
-        case "facebook":
-        resp.status(200).json({logIn :"Login Now", loggedInWith :"facebook"});
-        break;
-        case "tokenforLocal":
-        User.findOne({email:authData.email},function(err,result){
-          if (!err) {
-                resp.status(200).json({logIn :"Login Now", loggedInWith :"facebook"});
-              }
-              else {
-                resp.status(304).json({redirect :"redirect to login"});
-              }
-        })
-        break;
-      }
+      User.findOne({email:authData.email},function(err,result){
+        if (!err) {
+          var userInfo = {
+            email:result.email,
+            provider:result.provider,
+            name:result.name,
+            image:result.image,
+            userType:result.userType,
+            id:result._id
+          }
+          switch (currentProvider) {
+            case "google":
+            resp.status(200).json({logIn :"Login Now", loggedInWith :"google",user:userInfo});
+            break;
+            case "facebook":
+            resp.status(200).json({logIn :"Login Now", loggedInWith :"facebook",user:userInfo});
+            break;
+            case "tokenforLocal":
+                resp.status(200).json({logIn :"Login Now", loggedInWith :"local",user:userInfo});
+            break;
+          }
+        }
+        else {
+          resp.status(304).json({redirect :"redirect to login"});
+        }
+      })
     }
   });
 })
@@ -56,30 +63,39 @@ router.post("/",jsonParser,function(req,resp) {
         var clientId = '484031253264-4o9uj7ts2lacfepdbe7sk5n45eue39q6.apps.googleusercontent.com';
         verifier.verify(IdToken, clientId, function (err, tokenInfo) {
           if (!err) {
-              var socialUser = {"id":tokenInfo.sub , "email":tokenInfo.email , "provider":req.body.provider}
-              var token = jwt.sign(socialUser , process.env.sercret, {
-                expiresIn: 60*60*24*1000
-              });
-              var user = new User({
-                name: req.body.name,
-                email: req.body.email,
-                image: req.body.image,
-                userType:"customer",
-                token: token,
-                provider:"tokenforGoogle",
-                userSocialID:tokenInfo.sub
-              });
-              user.save(function(err,result) {
-                if (!err) {
-                  resp.json({
-                    resp: "tokenforGoogle",
-                    token: token
-                  })
+            var socialUser = {"id":tokenInfo.sub , "email":tokenInfo.email , "provider":req.body.provider}
+            var token = jwt.sign(socialUser , process.env.sercret, {
+              expiresIn: 60*60*24*1000
+            });
+            var user = new User({
+              name: req.body.name,
+              email: req.body.email,
+              image: req.body.image,
+              userType:"customer",
+              token: token,
+              provider:"tokenforGoogle",
+              userSocialID:tokenInfo.sub
+            });
+            user.save(function(err,result) {
+              if (!err) {
+                var userInfo = {
+                  email:result.email,
+                  provider:result.provider,
+                  name:result.name,
+                  image:result.image,
+                  userType:result.userType,
+                  id:result._id
                 }
-                else {
-                  resp.json(err);
-                }
-              })
+                resp.json({
+                  resp: "tokenforGoogle",
+                  token: token,
+                  user:userInfo
+                })
+              }
+              else {
+                resp.json(err);
+              }
+            })
           }
         });
       }
@@ -88,30 +104,39 @@ router.post("/",jsonParser,function(req,resp) {
         request.get(`https://graph.facebook.com/me?fields=id&access_token=${req.body.token}`,function (err, res , reqbody) {
           if (!err) {
             let userIDSentFromFB = JSON.parse(reqbody).id;
-              var socialUser = {"id":userIDSentFromFB , "email":req.body.email , "provider":req.body.provider}
-              var token = jwt.sign(socialUser , process.env.sercret, {
-                expiresIn: 60*60*24*1000
-              });
-              var user = new User({
-                name: req.body.name,
-                email: req.body.email,
-                image: req.body.image,
-                userType:"customer",
-                token: token,
-                provider:"tokenforFaceBook",
-                userSocialID: userIDSentFromFB
-              });
-              user.save(function(err,result) {
-                if (!err) {
-                  resp.json({
-                    resp: "tokenforFaceBook",
-                    token: token
-                  })
+            var socialUser = {"id":userIDSentFromFB , "email":req.body.email , "provider":req.body.provider}
+            var token = jwt.sign(socialUser , process.env.sercret, {
+              expiresIn: 60*60*24*1000
+            });
+            var user = new User({
+              name: req.body.name,
+              email: req.body.email,
+              image: req.body.image,
+              userType:"customer",
+              token: token,
+              provider:"tokenforFaceBook",
+              userSocialID: userIDSentFromFB
+            });
+            user.save(function(err,result) {
+              if (!err) {
+                var userInfo = {
+                  email:result.email,
+                  provider:result.provider,
+                  name:result.name,
+                  image:result.image,
+                  userType:result.userType,
+                  id:result._id
                 }
-                else {
-                  resp.json(err);
-                }
-              })
+                resp.json({
+                  resp: "tokenforFaceBook",
+                  token: token,
+                  user: userInfo
+                })
+              }
+              else {
+                resp.json(err);
+              }
+            })
           }
         })
       }
@@ -131,9 +156,18 @@ router.post("/",jsonParser,function(req,resp) {
         verifier.verify(IdToken, clientId, function (err, tokenInfo) {
           if (!err) {
             if(tokenInfo.sub == result.userSocialID){
+              var userInfo = {
+                email:result.email,
+                provider:result.provider,
+                name:result.name,
+                image:result.image,
+                userType:result.userType,
+                id:result._id
+              }
               resp.json({
                 resp: "tokenforGoogle",
-                token: result.token
+                token: result.token,
+                user : userInfo
               })
             };
           }
@@ -144,9 +178,18 @@ router.post("/",jsonParser,function(req,resp) {
           if (!err) {
             let userIDSentFromFB = JSON.parse(reqbody).id;
             if (userIDSentFromFB == result.userSocialID) {
+              var userInfo = {
+                email:result.email,
+                provider:result.provider,
+                name:result.name,
+                image:result.image,
+                userType:result.userType,
+                id:result._id
+              }
               resp.json({
                 resp: "tokenforFaceBook",
-                token: result.token
+                token: result.token ,
+                user: userInfo
               })
             }
           }
@@ -158,9 +201,18 @@ router.post("/",jsonParser,function(req,resp) {
           if (!err) {
             bcrypt.compare(req.body.password, result.password, function(err, res) {
               if (res == true) {
+                var userInfo = {
+                  email:result.email,
+                  provider:result.provider,
+                  name:result.name,
+                  image:result.image,
+                  userType:result.userType,
+                  id:result._id
+                }
                 resp.json({
                   resp: "tokenforLocal",
-                  token: result.token
+                  token: result.token,
+                  user: userInfo
                 })
               }
               else {

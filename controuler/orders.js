@@ -154,7 +154,7 @@ router.post('/add', jsonParser, function (req, res, next) {
         time: Date.now()
       });
       //console.log("ordeeeeeeeeeeeeeeeeeeeeeeeeeer",order);
-      
+
       element["products"].forEach(product => {
         productsArr.push(product);
       });
@@ -165,27 +165,27 @@ router.post('/add', jsonParser, function (req, res, next) {
 
   console.log("ordersArrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",ordersArr);
   console.log("productsArrrrrrrrrrrrrrrrrrrrrrrrrrr",productsArr);
-  
+
 
   var errorArr = checkAvaliablity(productsArr);
   if (errorArr.length > 0) {
     console.log("noooooooooooooooooooooooooooooooooooooooo");
-    
+
     res.json({err:errorArr});
   } else {
     console.log("yessssssssssssssssssssssssssssssssssssssssss");
-    
+
     ordersModel.insertMany(ordersArr, function (err, docs) {
       if (!err) {
-    console.log("entered---------------------------");        
+    console.log("entered---------------------------");
         docs.forEach(doc => {
          decremnetProducts(doc)
         });
         console.log(ordersArr);
         console.log(docs);
-        res.json({res:docs});        
+        res.json({res:docs});
       } else {
-    console.log("not----------entered---------------------------");                
+    console.log("not----------entered---------------------------");
         res.json({err:err});
       }
     });

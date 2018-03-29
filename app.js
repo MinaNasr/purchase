@@ -31,9 +31,7 @@ var orders = require('./controuler/orders');
 var products = require('./controuler/products');
 var categories = require('./controuler/category');
 var subcats = require('./controuler/subcat');
-var user = require('./controuler/user');
 var cart = require('./controuler/cart')
-
 
 
 
@@ -57,31 +55,29 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use("/api/user",apiUser);
 app.use("/api/authenticate",apiAuth);
 
-// app.use(function (req,resp,next) {
-//   var userToken = req.headers['token'];
-//   if (typeof userToken !== "undefined") {
-//     jwt.verify(userToken, 'mykey' , function (err,authData) {
-//       if (err) {
-//         resp.json({resp:"not Authurized"});
-//       }
-//       else {
-//         var decoded = jwtDecode(userToken);
-//         req.userEmail = decoded.email;
-//         next();
-//       }
-//     })
-//   }
-//   else {
-//     resp.json({token:"not Authurized"});
-//   }
-// })
+app.use(function (req,resp,next) {
+  var userToken = req.headers['token'];
+  if (typeof userToken !== "undefined") {
+    jwt.verify(userToken, 'mykey' , function (err,authData) {
+      if (err) {
+        resp.json({resp:"not Authurized"});
+      }
+      else {
+        var decoded = jwtDecode(userToken);
+        req.userEmail = decoded.email;
+        next();
+      }
+    })
+  }
+  else {
+    resp.json({token:"not Authurized"});
+  }
+})
 
 app.use('/api/orders', orders);
 app.use('/api/products', products);
 app.use('/api/categories', categories);
-app.use('/api/subcat', subcats);
-app.use('/api/user', user);
-app.use('/api/cart', cart);
+
 
 
 // catch 404 and forward to error handler

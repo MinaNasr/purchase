@@ -1,7 +1,4 @@
 [
-    {"name" : "laptop", "price" : 5000, "desc" : "very expensive multiuse laptop", "stock": 10, "subcat":"Mobiles"},
-    {"name" : "iphone6", "price" : 1000, "desc" : "very expensive multiuse mobile", "stock": 20, "subcat":"Power Bank"},
-    {"name" : "Charger", "price" : 100, "desc" : "very expensive multiuse mobile", "stock": 50, "subcat":"Mobile Accessories"},
-    {"name" : "iphone7", "price" : 7000, "desc" : "very expensive multiuse mobile", "stock": 50, "subcat":"Mobiles"}
-
+    {"name" : "laptop", "price" : 5000, "desc" : "very expensive multiuse laptop"},
+    {"name" : "iphone", "price" : 10000, "desc" : "very expensive multiuse mobile"}
 ]

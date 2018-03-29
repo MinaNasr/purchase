@@ -48,14 +48,14 @@ router.get('/:sellerid', function (request, response, next) {
             response.json(result);
         })
     }
-    
+
 });
 
 // add with post request
 router.post('/add', jsonParser, function (request, response, next) {
     console.log(request.body.productName);
     var subcat = request.body.subcat;
-    if(request.body.productName != "" && request.body.productPrice !="" && request.body.productDesc !="" && 
+    if(request.body.productName != "" && request.body.productPrice !="" && request.body.productDesc !="" &&
         request.body.image != ""){
     var product = new productsModule({
         productId: request.body.productId,
@@ -68,12 +68,12 @@ router.post('/add', jsonParser, function (request, response, next) {
         img: request.body.image
     })
     product.save(function (err, result) {
-        if (!err) {            
+        if (!err) {
             subcatModule.updateOne({name:subcat}, {$push : {products:result._id}}, (err, res) => {
                 if(!err){
                     response.json({ result: 'product added' });
                 }else{
-                    response.json(err); 
+                    response.json(err);
                 }
             });
 
@@ -86,7 +86,7 @@ router.post('/add', jsonParser, function (request, response, next) {
         response.json({result:"fill all input in this form"});
     }
 
-});     
+});
 
 //edit with post request
 router.put('/edit/:id', jsonParser, function (request, response, next) {
@@ -94,7 +94,7 @@ router.put('/edit/:id', jsonParser, function (request, response, next) {
     //response.send(request.body)
     console.log(request.body.productName);
     console.log(request.params.id);
-     if (request.body.name != "" && request.body.price !="" && request.body.desc !="" && 
+     if (request.body.name != "" && request.body.price !="" && request.body.desc !="" &&
         request.body.image != "") {
     productsModule.update({ _id: id }, { "$set": { name: request.body.productName, price: request.body.productPrice, desc: request.body.productDesc, userId: request.body.userId, img: request.body.image } }, function (err, result) {
         if (!err) {
@@ -106,7 +106,7 @@ router.put('/edit/:id', jsonParser, function (request, response, next) {
     })
        }else{
          response.json({result:"fill all input in this form"});
-    }   
+    }
 });
 
 //delete with get request

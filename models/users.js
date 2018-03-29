@@ -4,12 +4,7 @@ var Schema = mongoose.Schema;
 
 var userSchema = new Schema({
     name : {
-        type: String,
-        //required: [true, "name is required"],
-        // validate: {
-        //     validator:(name) => name.length > 5,
-        //     message: "must be longer than 5"
-        // }
+        type: String
     },
     email: {
         type: String,
@@ -18,7 +13,13 @@ var userSchema = new Schema({
     userType:{
       type: String,
     },
+    image:{
+      type: String,
+    },
     token:{
+      type: String,
+    },
+    uuid:{
       type: String,
     },
     password: {
