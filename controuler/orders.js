@@ -135,7 +135,7 @@ router.get('/:seller/:page?/:id?', function (req, res, next) {
 
 router.post('/add', jsonParser, function (req, res, next) {
 
-  var allProducts = req.body;
+  var allProducts = req.body.products;
   var ordersArr = [];
   var productsArr = [];
   var quantitiesArr = [];
@@ -167,13 +167,13 @@ router.post('/add', jsonParser, function (req, res, next) {
   console.log("productsArrrrrrrrrrrrrrrrrrrrrrrrrrr",productsArr);
   
 
-  // var errorArr = checkAvaliablity(productsArr);
-  // if (errorArr.length > 0) {
-  //   console.log("noooooooooooooooooooooooooooooooooooooooo");
+  var errorArr = checkAvaliablity(productsArr);
+  if (errorArr.length > 0) {
+    console.log("noooooooooooooooooooooooooooooooooooooooo");
     
-  //   res.json({err:errorArr});
-  // } else {
-  //   console.log("yessssssssssssssssssssssssssssssssssssssssss");
+    res.json({err:errorArr});
+  } else {
+    console.log("yessssssssssssssssssssssssssssssssssssssssss");
     
     ordersModel.insertMany(ordersArr, function (err, docs) {
       if (!err) {
@@ -183,13 +183,13 @@ router.post('/add', jsonParser, function (req, res, next) {
         });
         console.log(ordersArr);
         console.log(docs);
-        res.json({res: "success"});        
+        res.json({res:docs});        
       } else {
     console.log("not----------entered---------------------------");                
-        res.json({err:"error"});
+        res.json({err:err});
       }
     });
-  // }
+  }
 
 });
 
@@ -201,7 +201,7 @@ function checkAvaliablity(arr,quants) {
       if (err) {
         errorArr.push(element);
       } else {
-        if (data.stock < quants[i] || !data.stock) {
+        if (data.amount < quants[i] || !data.amount) {
           errorArr.push(element);
         }
       }
@@ -229,9 +229,8 @@ function decremnetProducts(doc) {
         const product = data.products[i];
         const quant = data.quantities[i];
         console.log(product._id);
-        console.log(quant);
-        productsModel.updateOne({ _id: product._id, stock: { $gt: 0 } }
-          , { $inc: { stock: -quant } }
+        productsModel.updateOne({ _id: product._id, amount: { $gt: 0 } }
+          , { $inc: { amount: -quant } }
           , (err, raw) => {
             console.log(raw);
             if (i == (data.products.length - 1)) {

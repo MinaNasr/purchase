@@ -1,102 +1,98 @@
-
-var express = require('express');
-var router = express.Router();
-var mongoose = require("mongoose");
+var jwt = require('jsonwebtoken');
+var express = require("express");
 var bodyParser = require("body-parser");
-var UrlEncodedParser = bodyParser.urlencoded({ extended: true });
-var jsonParser = bodyParser.json({ limit: "50mb" });
+var urlEncodedMid = bodyParser.urlencoded({extended:true});
+var verifier = require('google-id-token-verifier');
+var request = require('request');
+var jsonParser = bodyParser.json();
+var router = express.Router();
+var bcrypt = require('bcrypt');
+var mongoose = require("mongoose");
+var User = mongoose.model("users");
 
-var userModule = mongoose.model("users");
-var productModule = mongoose.model('products');
-var orderModule = mongoose.model('orders');
 
-router.post('/cart', jsonParser, function (request, response) {
+router.get("/",urlEncodedMid,function (req,resp) {
+  console.log(req.body);
+})
 
-    userModule.updateOne({ _id: request.body.userId }, { $push: { cart: request.body.productId } }, (err, res) => {
-        if (!err) {
-            response.json({ result: 'product added' });
-        } else {
-            response.json(err);
+router.post("/",urlEncodedMid,function(req,resp){
+
+  const saltRounds = 10;
+  const myPlaintextPassword = `${req.body.password}`;
+  bcrypt.hash(myPlaintextPassword, saltRounds, function(err, hash) {
+    if (!err) {
+      let hashedPW = hash;
+      if (req.body.nationalID != "123456789123") {
+        console.log("first if");
+        let tokenData = {
+          name:req.body.userName,
+          userType:"seller",
+          email:req.body.email,
+          provider:"tokenforLocal",
+          password: hashedPW,
         }
-    });
-});
-
-router.get('/cart/:id', (request, response) => {
-    userModule.findOne({ _id: request.params.id }, { cart: 1 }).populate('cart').exec((err, data) => {
-        if (!err) {
-
-            response.json(data.cart);
-        } else {
-            response.json(err);
-        }
-    });
-});
-
-router.delete('/cart/:userId/:productId?', (request, response) => {
-    if (request.params.productId) {
-        userModule.updateOne({ _id: request.params.userId }, { $pull: { cart: request.params.productId } }, (err, res) => {
-            if (!err) {
-                response.redirect(303, '/api/user/cart/' + request.params.userId);
-            }
+        var token = jwt.sign(tokenData , process.env.sercret, {
+          expiresIn: 60*60*24*1000
         });
-    } else {
-        userModule.updateOne({ _id: request.params.userId }, { $set: { cart: [] } }, (err, res) => {
-            if (!err) {
-                response.redirect(303, '/api/user/cart/' + request.params.userId);
-            }
+        var newUser = new User({
+          name: req.body.userName,
+          email: req.body.email,
+          password: hashedPW,
+          address: req.body.address,
+          national_id:req.body.nationalID,
+          userType:"seller",
+          token: token,
+          provider:"tokenforLocal"
         });
-    }
-});
-
-router.post('/cart/checkout', jsonParser, function (request, response) {
-    var numberOfProducts = [];
-    var products = [];
-    var order = request.body;
-    //var sellers = Object.keys(order);
-    var count = 0;
-    var error = [];
-
-    for (var seller in order) {
-        products = products.concat(order[seller].products);
-        numberOfProducts = numberOfProducts.concat(order[seller].numbers);
-    }
-    //response.json(error);
-
-    function check() {
-        if (count < products.length) {
-
-            productModule.findOne({ _id: products[count] }, { stock: 1, name: 1 }, function (err, res) {
-
-                if (!err) {
-                    if (res.stock < numberOfProducts[count]) {
-                        error.push({ name: res.name, available: res.stock });
-                        console.log(error);
-
-                        // count++;
-                        // check();
-                    }
-                    count++;
-                    check();
-                }
-
-            });
-        } else {
-            response.json(error);
+      }
+      else {
+        let tokenData = {
+          name:req.body.userName,
+          userType:"customer",
+          email:req.body.email,
+          provider:"tokenforLocal",
+          password: hashedPW
         }
+        var token = jwt.sign(tokenData , process.env.sercret, {
+          expiresIn: 60*60*24*1000
+        });
 
+        var newUser = new User({
+          name: req.body.userName,
+          email: req.body.email,
+          password: hashedPW,
+          address: req.body.address,
+          userType:"customer",
+          token: token,
+          provider:"tokenforLocal"
+        });
+
+      }
+
+      newUser.save(function(err,result) {
+        console.log(result);
+        if (!err) {
+          resp.json({token:result.token,provider:result.provider});
+        }
+        else {
+          resp.json(err);
+        }
+      })
     }
-    check();
+  });
+});
+
+router.post("/validations",urlEncodedMid,function(req,resp){
+  User.findOne({email:req.body.mail},function(err,result){
+    if (result == null) {
+      resp.json({});
+    }
+    else{
+      resp.json({data:"invalid"});
+    }
+  })
 });
 
 
-router.post("/add", (request, response) => {
-    var user = new userModule({
-        name: "gemy"
-    });
-
-    user.save((err, res) => {
-        response.json({ mess: "ok" });
-    });
-});
 
 module.exports = router;
