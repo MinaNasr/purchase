@@ -1,0 +1,6 @@
+[
+    {"name" : "Electronics", "_id" : 1, "subcat" : [5, 6]},
+    {"name" : "Mobils & Tablets", "_id" : 2, "subcat" : [1, 2, 3, 4]},
+    {"name" : "Sports & Fitness", "_id" : 3, "subcat" : [7, 8, 9]},
+    {"name" : "Fashion", "_id" : 4, "subcat" : [10, 11, 12]}
+]
