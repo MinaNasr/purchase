@@ -18,7 +18,6 @@ var subcatModule = mongoose.model("subcat");
 
 router.get('/search/:keyword', (req, res) => {
     var re = new RegExp("^" + req.params.keyword, "i");
-    console.log(re);
     productsModule.find({$or : [{'name': { $regex:  re} }, {'desc': { $regex:  re} }]}, (error, data) => {
         res.json(data);
     });
@@ -38,13 +37,13 @@ router.get('/:id?', function (request, response, next) {
 
 });
 
-
-
 //seller id
-router.get('/:sellerid', function (request, response, next) {
+router.get('/seller/:sellerid', function (request, response, next) {
+    console.log("inside");
+    
     if (request.params.sellerid) {
         var seller = request.params.sellerid
-        productsModule.findOne({ userId : seller }, function (err, result) {
+        productsModule.find({ userId : seller }, function (err, result) {
             response.json(result);
         })
     }

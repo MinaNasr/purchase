@@ -31,10 +31,8 @@ var orders = require('./controuler/orders');
 var products = require('./controuler/products');
 var categories = require('./controuler/category');
 var subcats = require('./controuler/subcat');
-var cart = require('./controuler/cart')
-
-
-
+var cart = require('./controuler/cart');
+var rating = require('./controuler/rating');
 
 app.use(function(req,resp,next){
   resp.header("Access-Control-Allow-Origin","*");
@@ -79,6 +77,7 @@ app.use('/api/products', products);
 app.use('/api/categories', categories);
 app.use('/api/cart', cart);
 app.use('/api/subcat', subcats);
+app.use('/api/rating', rating);
 
 
 

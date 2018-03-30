@@ -13,7 +13,7 @@ router.get("/:catname?",function(req, resp){
       if (err) {
         resp.json(err);
       }else {
-        console.log(result);
+        //console.log(result);
         resp.json({"result":{"category":result}});
       }
 
@@ -30,6 +30,30 @@ router.get("/:catname?",function(req, resp){
 
   }
 });
+
+
+router.get("/:catname/products", function (req, resp) {
+  if (req.params.catname == "all") {
+    catModel.find({}).populate('subcat').exec((err, data) => {
+      if (!err) {
+        catModel.populate(data, {path:'subcat.products', model:'products'},(err, res) => {
+          resp.json(data);
+        })
+      }
+    });
+  } else {   
+    catModel.find({name: req.params.catname}).populate('subcat').exec((err, data) => {
+      if (!err) {
+        catModel.populate(data, {path:'subcat.products', model:'products'},(err, res) => {
+          resp.json(data);
+        })
+      }
+    });
+
+
+  }
+});
+
 
 
 module.exports = router;

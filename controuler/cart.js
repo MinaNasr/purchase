@@ -10,14 +10,35 @@ var productModule = mongoose.model('products');
 var orderModule = mongoose.model('orders');
 
 router.post('/add', jsonParser, function (request, response) {
-
-    userModule.updateOne({ _id: request.body.userId }, { $push: { cart: request.body.productId } }, (err, res) => {
-        if (!err) {
-            response.json({ result: 'product added' });
-        } else {
-            response.json(err);
+    var flag = true;
+    userModule.findOne({_id: request.body.userId}, {cart:1}, (err, res) => {
+        if(!err){
+            console.log(res.cart);
+            
+            res.cart.forEach(product => {
+                console.log(product);                
+                if(product == request.body.productId){
+                    flag = false;
+                    response.json({result: "already exist"})
+                }                
+            });
+            
+            if(flag){
+                userModule.updateOne({ _id: request.body.userId }, { $push: { cart: request.body.productId } }, (err, res) => {
+                    if (!err) {
+                        response.json({ result: 'product added' });
+                    } else {
+                        response.json(err);
+                    }
+                });
+        
+            }
         }
     });
+
+   
+
+    
 });
 
 router.get('/:id', (request, response) => {
@@ -58,7 +79,6 @@ router.post('/checkout', jsonParser, function (request, response) {
         products = products.concat(order[seller].products);
         numberOfProducts = numberOfProducts.concat(order[seller].numbers);
     }
-    //response.json(error);
 
     function check() {
         if (count < products.length) {
@@ -83,15 +103,15 @@ router.post('/checkout', jsonParser, function (request, response) {
 });
 
 
-// router.post("/user", (request, response) => {
-//     var user = new userModule({
-//         name: "gemy",
-//         email:"gemy@gmail.com"
-//     });
+router.post("/user", (request, response) => {
+    var user = new userModule({
+        name: "tarek",
+        email:"gemy@gmail.com"
+    });
 
-//     user.save((err, res) => {
-//         response.json({ mess: "ok" });
-//     });
-// });
+    user.save((err, res) => {
+        response.json({ mess: "ok" });
+    });
+});
 
 module.exports = router;
