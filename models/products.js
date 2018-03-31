@@ -12,6 +12,10 @@ var productSchema = new Schema({
     img:{
         type: String,
     },
+    offer:{
+      type: Number,
+      default:0,
+    },
     desc: {
         type: String,
     },
