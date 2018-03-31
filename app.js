@@ -36,7 +36,7 @@ var rating = require('./controuler/rating');
 
 app.use(function(req,resp,next){
   resp.header("Access-Control-Allow-Origin","*");
-  resp.header("Access-Control-Allow-Headers","X-ACCESS_TOKEN , Access-Control-Allow-Origin , Authorization , Origin , x-requested-with , Content-Type , token,email");
+  resp.header("Access-Control-Allow-Headers","X-ACCESS_TOKEN , Access-Control-Allow-Origin , Authorization , Origin , x-requested-with , Content-Type , token,email,offers");
   resp.header("Access-Control-Allow-Methods","GET,POST,PUT,DELETE")
   next();
 });

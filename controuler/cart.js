@@ -12,17 +12,17 @@ var orderModule = mongoose.model('orders');
 router.post('/add', jsonParser, function (request, response) {
     var flag = true;
     userModule.findOne({_id: request.body.userId}, {cart:1}, (err, res) => {
-        if(!err){
+        if(!err && res){
             console.log(res.cart);
-            
+
             res.cart.forEach(product => {
-                console.log(product);                
+                console.log(product);
                 if(product == request.body.productId){
                     flag = false;
                     response.json({result: "already exist"})
-                }                
+                }
             });
-            
+
             if(flag){
                 userModule.updateOne({ _id: request.body.userId }, { $push: { cart: request.body.productId } }, (err, res) => {
                     if (!err) {
@@ -31,20 +31,19 @@ router.post('/add', jsonParser, function (request, response) {
                         response.json(err);
                     }
                 });
-        
+
             }
         }
     });
 
-   
 
-    
+
+
 });
 
 router.get('/:id', (request, response) => {
     userModule.findOne({ _id: request.params.id }, { cart: 1 }).populate('cart').exec((err, data) => {
-        if (!err) {
-
+        if (!err && data) {
             response.json(data.cart);
         } else {
             response.json(err);
@@ -87,7 +86,7 @@ router.post('/checkout', jsonParser, function (request, response) {
 
                 if (!err) {
                     if (res.stock < numberOfProducts[count]) {
-                        error.push({ name: res.name, available: res.stock });                        
+                        error.push({ name: res.name, available: res.stock });
                     }
                     count++;
                     check();

@@ -20,6 +20,7 @@ router.get("/",function(req , resp) {
     if (err) {
       resp.status(404).json({redirect :"redirect to login"});
     }
+    
     else {
       let currentProvider = authData.provider;
       User.findOne({email:authData.email},function(err,result){
