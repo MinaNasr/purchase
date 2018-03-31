@@ -32,11 +32,9 @@ var transporter = nodemailer.createTransport(smtpTransport({
 
 
 router.get("/",rawBody,function (req,resp) {
-  console.log(req.body);
 })
 
 router.post("/",urlEncodedMid,function(req,resp){
-  console.log(req.body);
   cloudinary.uploader.upload(`${req.body.image}`, function(result) {
     userImageURL = result.secure_url;
     const saltRounds = 10;
@@ -45,7 +43,6 @@ router.post("/",urlEncodedMid,function(req,resp){
       if (!err) {
         let hashedPW = hash;
         if (req.body.nationalID != "123456789123") {
-          console.log("first if");
           let tokenData = {
             name:req.body.userName,
             userType:"seller",
@@ -94,7 +91,6 @@ router.post("/",urlEncodedMid,function(req,resp){
         }
 
         newUser.save(function(err,result) {
-          console.log(result);
           if (!err) {
             resp.json({token:result.token,provider:result.provider});
           }
@@ -168,6 +164,95 @@ router.put("/forgetpass",urlEncodedMid,function (req,resp) {
     }
   })
   console.log(req.body);
+})
+
+router.put("/:id?",urlEncodedMid,function (req,resp) {
+  let userID = req.params.id;
+  User.findOne({email: req.body.email},function (err,result) {
+    if (result != null && (result._id == userID)) {
+      if (req.body.image != null) {
+        cloudinary.uploader.upload(`${req.body.image}`, function(result) {
+          userImageURL = result.secure_url;
+          const saltRounds = 10;
+          const myPlaintextPassword = `${req.body.password}`;
+          bcrypt.hash(myPlaintextPassword, saltRounds, function(err, hash) {
+            if (!err) {
+              let hashedPW = hash;
+              User.updateOne({_id:userID},{"$set":{password:hash , email:req.body.email , name:req.body.userName , image:userImageURL , address:req.body.address}},function(err,res) {
+                if (!err) {
+                  resp.json(res)
+                }
+                else {
+                  resp.json(err)
+                }
+              })
+            }
+          })
+        })
+      }
+      else {
+        const saltRounds = 10;
+        const myPlaintextPassword = `${req.body.password}`;
+        bcrypt.hash(myPlaintextPassword, saltRounds, function(err, hash) {
+          if (!err) {
+            let hashedPW = hash;
+            console.log(userID);
+            User.updateOne({_id:userID},{"$set":{password:hash , email:req.body.email , name:req.body.userName , address:req.body.address}},function(err,res) {
+              if (!err) {
+                resp.json(res)
+              }
+              else {
+                resp.json(err)
+              }
+            })
+          }
+        })
+      }
+    }
+    else if (result == null) {
+      if (req.body.image != null) {
+        cloudinary.uploader.upload(`${req.body.image}`, function(result) {
+          userImageURL = result.secure_url;
+          const saltRounds = 10;
+          const myPlaintextPassword = `${req.body.password}`;
+          bcrypt.hash(myPlaintextPassword, saltRounds, function(err, hash) {
+            if (!err) {
+              let hashedPW = hash;
+              User.updateOne({_id:userID},{"$set":{password:hash , email:req.body.email , name:req.body.userName , image:userImageURL , address:req.body.address}},function(err,res) {
+                if (!err) {
+                  resp.json(res)
+                }
+                else {
+                  resp.json(err)
+                }
+              })
+            }
+          })
+        })
+      }
+      else {
+        const saltRounds = 10;
+        const myPlaintextPassword = `${req.body.password}`;
+        bcrypt.hash(myPlaintextPassword, saltRounds, function(err, hash) {
+          if (!err) {
+            let hashedPW = hash;
+            User.updateOne({_id:userID},{"$set":{password:hash , email:req.body.email , name:req.body.userName , address:req.body.address}},function(err,res) {
+              if (!err) {
+                resp.json(res)
+              }
+              else {
+                resp.json(err)
+              }
+            })
+          }
+        })
+      }
+    }
+    else {
+      resp.json({invalid:"Email Already Taken"})
+    }
+  })
+
 })
 
 

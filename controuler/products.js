@@ -29,7 +29,15 @@ router.get('/:id?', function (request, response, next) {
         productsModule.findOne({ _id: id }, function (err, result) {
             response.json(result);
         })
-    } else {
+    }
+    else if (request.headers.offers) {
+      productsModule.find({}).sort({"offer":-1}).limit(4).exec(function(err,result) {
+        if (!err) {
+          response.json(result);
+        }
+      })
+    }
+    else {
         productsModule.find({}, function (err, result) {
             response.json(result);
         })
@@ -40,7 +48,7 @@ router.get('/:id?', function (request, response, next) {
 //seller id
 router.get('/seller/:sellerid', function (request, response, next) {
     console.log("inside");
-    
+
     if (request.params.sellerid) {
         var seller = request.params.sellerid
         productsModule.find({ userId : seller }, function (err, result) {
@@ -64,6 +72,7 @@ router.post('/add', jsonParser, function (request, response, next) {
         stock: request.body.pcs,
         subcat: request.body.subcat,
         userId: request.body.userId,
+        offer: request.body.offer,
         img: request.body.image
     })
     product.save(function (err, result) {
@@ -95,7 +104,7 @@ router.put('/edit/:id', jsonParser, function (request, response, next) {
     console.log(request.params.id);
      if (request.body.name != "" && request.body.price !="" && request.body.desc !="" &&
         request.body.image != "") {
-    productsModule.update({ _id: id }, { "$set": { name: request.body.productName, price: request.body.productPrice, desc: request.body.productDesc, userId: request.body.userId, img: request.body.image } }, function (err, result) {
+    productsModule.update({ _id: id }, { "$set": { name: request.body.productName, offer:request.body.offer ,price: request.body.productPrice, desc: request.body.productDesc, userId: request.body.userId, img: request.body.image } }, function (err, result) {
         if (!err) {
             response.json({ result: "product edited" });
         } else {

@@ -30,7 +30,8 @@ router.get("/",function(req , resp) {
             name:result.name,
             image:result.image,
             userType:result.userType,
-            id:result._id
+            id:result._id,
+            address:result.address
           }
           switch (currentProvider) {
             case "google":
