@@ -91,10 +91,16 @@ router.post('/checkout', jsonParser, function (request, response) {
                     count++;
                     check();
                 }
-
             });
         } else {
-            response.json(error);
+            if(error.length > 0){
+              response.json({res: "outOfStock", error: error});
+            }else{
+              addOrder(order, request, response);
+              //console.log(res);
+              //response.json(res);
+            }
+
         }
 
     }
@@ -112,5 +118,67 @@ router.post("/user", (request, response) => {
         response.json({ mess: "ok" });
     });
 });
+
+function addOrder(order, req, res){
+  console.log("yaaaaaaaaaaaa");
+  var allProducts = order;
+  var ordersArr = [];
+  var productsArr = [];
+  var quantitiesArr = [];
+
+  for (const key in allProducts) {
+
+    if (allProducts.hasOwnProperty(key)) {
+      const element = allProducts[key];
+      var order = new orderModule({
+        status: "ordered",
+        products: element["products"],
+        user: req.body.user,
+        sellerId: key,
+        quantities: element["numbers"],
+        time: Date.now()
+      });
+
+      element["products"].forEach(product => {
+        productsArr.push(product);
+      });
+      quantitiesArr.push(...order.quantities);
+      ordersArr.push(order);
+    }
+  }
+
+  orderModule.insertMany(ordersArr, function (err, docs) {
+    if (!err) {
+      docs.forEach(doc => {
+        decremnetProducts(doc)
+      });
+      res.json({ res: "success" });
+    } else {
+      res.json({ res: "error" });
+    }
+  });
+}
+
+function decremnetProducts(doc) {
+  orderModule.findById(doc._id).populate("products")
+    .exec((err, data) => {
+
+      for (let i = 0; i < data.products.length; i++) {
+        const product = data.products[i];
+        const quant = data.quantities[i];
+        productModule.updateOne({ _id: product._id, stock: { $gt: 0 } }
+          , { $inc: { stock: -quant } }
+          , (err, raw) => {
+            if (i == (data.products.length - 1)) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+
+      }
+    });
+
+}
 
 module.exports = router;
